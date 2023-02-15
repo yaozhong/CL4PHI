@@ -3,16 +3,19 @@
 ![](figure/pipeline.png)
 
 
-
 ## Datasets
 
-DeepHost benchmark dataset
-CHERRY benchmark dataset
-Host genome sequence
+We store related data and model on Google cloud:
+https://drive.google.com/drive/folders/1GUlI9h24pANmcq_7qULDQxz2cYtXntY2?usp=sharing
+
+### Dataset
+
+### Trained models
 
 
 
-## Training
+## Running thde code
+### Training
 
 lr=1e-3
 epoch=10
@@ -42,7 +45,7 @@ python $CODE --model $model --model_dir $model_save_path/${model_info}.pth --kme
 
 
 
-## Prediction
+### Prediction
 
 model_file="model/CL4PHI/DeepHostDATA_CL_CNN_kmer-6_lr-1e-3_batch-32_margin-1.pth"
 OUTPUT="results/CL4PHI_pred_results.txt"
@@ -56,6 +59,8 @@ test_host_gold="data/CHERRY_benchmark_datasplit/CHERRY_y_test.csv"
 python $CODE --model "CNN" --model_dir $model_file \
  --host_fa $host_fa --host_list $host_list \
  --test_phage_fa $test_phage_fa  --test_host_gold  $test_host_gold \
- --kmer $kmer --device $device  > $OUTPUT/CL_pred_result-by-${model_info}.txt 
+ --kmer $kmer --device $device 
+
+
 
 
