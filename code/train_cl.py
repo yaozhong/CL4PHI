@@ -152,11 +152,10 @@ if __name__ == "__main__":
 	parser.add_argument('--host_fa',   default="",  type=str, required=True, help='Host fasta files')
 	parser.add_argument('--host_list', default="",  type=str, required=True, help='Host species list')
 
-	parser.add_argument('--train_phage_fa', default="",   type=str, required=True, help='Host species list')
-	parser.add_argument('--train_host_gold', default="",  type=str, required=True, help='Host species list')
-	parser.add_argument('--valid_phage_fa', default="",   type=str, required=True, help='Host species list')
-	parser.add_argument('--valid_host_gold', default="",  type=str, required=True, help='Host species list')
-
+	parser.add_argument('--train_phage_fa', default="",   type=str, required=True, help='Trainset Phage fasta file')
+	parser.add_argument('--train_host_gold', default="",  type=str, required=True, help='Trainset Phage infectable host label')
+	parser.add_argument('--valid_phage_fa', default="",   type=str, required=True, help='Validset Phage fasta file')
+	parser.add_argument('--valid_host_gold', default="",  type=str, required=True, help='Validset Phage infectable host label')
 
 	
 	args = parser.parse_args()

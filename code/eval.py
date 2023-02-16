@@ -49,6 +49,39 @@ def test(model, cached_ph, l2fa, cached_label, device, threshold=1, verbose=Fals
 	return acc, pred_dist, gold_list
 
 
+# prediction without provide gold standard
+def predict(model, cached_ph, l2fa, device):
+
+	# first generate embeddings for the host.
+	host_vec = np.array([l2fa[l] for l in l2fa.keys()])
+	host_vec = torch.tensor(host_vec, dtype=torch.float32).to(device)
+	host_vec = torch.unsqueeze(host_vec, dim=1)
+
+	embed_bts = model(host_vec)
+	label_list = list(l2fa.keys())
+
+	pred_list, pred_dist = [], []
+	total_batch = len(cached_ph)
+
+	with torch.no_grad():
+		for i in range(total_batch):
+			phs = cached_ph[i]
+			phs = phs.to(device)
+			embed_phs = model(phs)
+
+			# local calcuation of the distance scores
+			for e_ph in embed_phs:
+				diff =  embed_bts - e_ph
+				dist_sq = torch.sum(torch.pow(diff, 2), 1)
+				dist = torch.sqrt(dist_sq)
+
+				pred_dist.append(dist.to("cpu").detach().numpy())
+
+				#idx = torch.argmin(dist).to("cpu").detach().numpy()	
+				#pred_list.extend([label_list[idx]])
+				
+	return pred_dist
+
 
 if __name__ == "__main__":
 
@@ -60,13 +93,13 @@ if __name__ == "__main__":
 
 	parser.add_argument('--kmer',       default=6,       type=int, required=True, help='kmer length')
 	parser.add_argument('--batch_size' ,default=64,      type=int,  required=False, help="batch_size of the training.")
-	parser.add_argument('--workers',     default=64,       type=int, required=False, help='number of worker for data loading')
+	parser.add_argument('--workers',     default=8,       type=int, required=False, help='number of worker for data loading')
 
 	# data related input
 	parser.add_argument('--host_fa',   default="",  type=str, required=True, help='Host fasta files')
 	parser.add_argument('--host_list', default="",  type=str, required=True, help='Host species list')
 	parser.add_argument('--test_phage_fa', default="",   type=str, required=True, help='Test phage fasta file')
-	parser.add_argument('--test_host_gold', default="",  type=str, required=True, help='Host species list')
+	parser.add_argument('--test_host_gold', default="",  type=str, required=True, help='Infecting host gold list')
 
 	args = parser.parse_args()
 
@@ -115,7 +148,10 @@ if __name__ == "__main__":
 	
 	print("[ok]")
 	print("@ Start prediction ...")
-	acc_test, host_pred_list, gold_list  = test(model, cached_test_ph, l2fa, cached_test_label, args.device)
+	if args.test_host_gold != "":
+		acc_test, host_pred_list, gold_list  = test(model, cached_test_ph, l2fa, cached_test_label, args.device)
+	else:
+		host_pred_list = predict(model, cached_test_ph, l2fa, args.device)
 
 	for i in range(len(gold_list)):
 
