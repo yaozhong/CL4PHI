@@ -13,13 +13,14 @@ https://drive.google.com/drive/folders/1GUlI9h24pANmcq_7qULDQxz2cYtXntY2?usp=sha
 We provided processed datasets of the benchmark datasets used in [DeepHost](https://github.com/deepomicslab/DeepHost/tree/master/data) and [CHERRY](https://github.com/KennthShang/CHERRY/tree/main/Interactiondata).
 
 Phage fasta files and gold standard of each data split can be found:
-- DeepHost benchmark dataset 
-https://drive.google.com/drive/folders/1bC-YeEc_72ZvjRH1CxKZJ2CLbtg6jQ7W?usp=share_link
+- **DeepHost benchmark dataset**
+  - https://drive.google.com/drive/folders/1bC-YeEc_72ZvjRH1CxKZJ2CLbtg6jQ7W?usp=share_link
 
-- CHERRY benchmark dataset 
- 	- https://drive.google.com/drive/folders/1RBT-zIXZEc_6vdPVWG2lXJ1SRc7fastl?usp=share_link
-	- Hosts fasta files used in training and testing CHERRY model are stored in 
-      https://drive.google.com/drive/folders/1FeoiGM_yt2r4Kosn0I2EApEdGxwSkHU0?usp=share_link
+- **CHERRY benchmark dataset**
+  - https://drive.google.com/drive/folders/1RBT-zIXZEc_6vdPVWG2lXJ1SRc7fastl?usp=share_link
+
+- **Hosts fasta files** used in training and testing CHERRY models for the two benchmark datasets are stored in 
+  - https://drive.google.com/drive/folders/1FeoiGM_yt2r4Kosn0I2EApEdGxwSkHU0?usp=share_link
 
 
 
