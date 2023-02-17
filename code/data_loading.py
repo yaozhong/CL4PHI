@@ -42,7 +42,7 @@ def get_label_map(species_file):
 
 def load_host_label(file_name, l2s_dic):
 
-	if file_name == None:
+	if file_name == '':
 		return []
 
 	s_in = open(file_name)
@@ -148,6 +148,8 @@ class fasta_dataset(Dataset):
 		return	len(self.name)
 
 	def __getitem__(self, idx):
+		if(len(self.label) == 0):
+			return self.name[idx], self.seq[idx], []
 		return self.name[idx], self.seq[idx], self.label[idx]
 
 	def get_s2l_dic(self):

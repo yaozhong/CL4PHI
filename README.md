@@ -84,12 +84,11 @@ host_list="data/CHERRY_benchmark_datasplit/species.txt"
 
 # test data
 test_phage_fa="data/CHERRY_benchmark_datasplit/CHERRY_test.fasta"
-test_host_gold="data/CHERRY_benchmark_datasplit/CHERRY_y_test.csv" or ""
 
 
 python code/eval.py --model "CNN" --model_dir $model_file \
  --host_fa $host_fa --host_list $host_list \
- --test_phage_fa $test_phage_fa  --test_host_gold  $test_host_gold \
+ --test_phage_fa $test_phage_fa \
  --kmer $kmer --device $device 
 ```
 

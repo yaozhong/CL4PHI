@@ -99,7 +99,7 @@ if __name__ == "__main__":
 	parser.add_argument('--host_fa',   default="",  type=str, required=True, help='Host fasta files')
 	parser.add_argument('--host_list', default="",  type=str, required=True, help='Host species list')
 	parser.add_argument('--test_phage_fa', default="",   type=str, required=True, help='Test phage fasta file')
-	parser.add_argument('--test_host_gold', default="",  type=str, required=True, help='Infecting host gold list')
+	parser.add_argument('--test_host_gold', default="",  type=str, required=False, help='Infecting host gold list')
 
 	args = parser.parse_args()
 
@@ -153,7 +153,7 @@ if __name__ == "__main__":
 	else:
 		host_pred_list = predict(model, cached_test_ph, l2fa, args.device)
 
-	for i in range(len(gold_list)):
+	for i in range(len(cached_test_ph)):
 
 		print(test_phName[i], end="\t")
 		idxs = np.argsort(host_pred_list[i])
