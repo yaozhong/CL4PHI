@@ -1,6 +1,6 @@
 # Contrastive Learning for Phage-host interaction (CL4PHI)
 
-![](figure/pipeline.png)
+![](figures/pipeline.png)
 
 ## Enviroments and Package dependency
 
