@@ -158,7 +158,7 @@ if __name__ == "__main__":
 		print(test_phName[i], end="\t")
 		idxs = np.argsort(host_pred_list[i])
 		for idx in idxs:
-			print(l2sn[idx]+"_"+str(host_pred_list[i][idx]), end=" ")
+			print(l2sn[label_list[idx]]+"_"+str(host_pred_list[i][idx]), end=" ")
 
 		print("")
 
