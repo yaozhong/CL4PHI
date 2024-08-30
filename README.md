@@ -92,6 +92,5 @@ python code/eval.py --model "CNN" --model_dir $model_file \
  --kmer $kmer --device $device 
 ```
 
-
-
-
+## Update
+2024/08/06  The text output format bug has been fixed (line 161 in eval.py, with no impact on the evaluation of benchmark datasets). 
