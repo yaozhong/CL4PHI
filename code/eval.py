@@ -101,6 +101,8 @@ if __name__ == "__main__":
 	parser.add_argument('--test_phage_fa', default="",   type=str, required=True, help='Test phage fasta file')
 	parser.add_argument('--test_host_gold', default="",  type=str, required=False, help='Infecting host gold list')
 
+	parser.add_argument('--use_tran_bn', action='store_true', required=False, help='use the batch norm in the train')
+	
 	args = parser.parse_args()
 
 	kmer = args.kmer
@@ -109,7 +111,7 @@ if __name__ == "__main__":
 
 	# preparing the test data for the evaluation.
 	## 1. loading model
-	print("@ Loading model ... ", end="")
+	#print("@ Loading model ... ", end="")
 	## parparing host data information.
 	if args.model == "CNN":
 		model = cnn_module(7, 0)
@@ -117,10 +119,13 @@ if __name__ == "__main__":
 	model.load_state_dict(torch.load(args.model_dir))
 	model = model.to(args.device)
 
-	print("[ok]")
+	if args.use_tran_bn:
+		model.eval()
+
+	#print("[ok]")
 
 	## 2. loading data
-	print("@ Loading phage dataset ... ", end="")
+	#print("@ Loading phage dataset ... ", end="")
 	spiece_file = args.host_list
 	host_fa_file = args.host_fa	
 	phage_test_file = args.test_phage_fa
@@ -137,17 +142,17 @@ if __name__ == "__main__":
 		cached_test_label.append(torch.tensor(labels))
 		test_phName.extend(phName)
 
-	print("[ok]")
+	#print("[ok]")
 
 	# viualizaiton
-	print("@ Loading Host dataset ... ", end="")
+	#print("@ Loading Host dataset ... ", end="")
 	s2l_dic = fa_test_dataset.get_s2l_dic()
 	l2fa = get_host_fa(s2l_dic, host_fa_file, kmer)
 	l2sn = fa_test_dataset.get_l2s_dic()
 	label_list = list(l2fa.keys())
 	
-	print("[ok]")
-	print("@ Start prediction ...")
+	#print("[ok]")
+	#print("@ Start prediction ...")
 	if args.test_host_gold != "":
 		acc_test, host_pred_list, gold_list  = test(model, cached_test_ph, l2fa, cached_test_label, args.device)
 	else:
