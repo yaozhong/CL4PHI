@@ -119,7 +119,7 @@ if __name__ == "__main__":
 	model.load_state_dict(torch.load(args.model_dir))
 	model = model.to(args.device)
 
-	if args.use_tran_bn:
+	if args.use_train_bn:
 		model.eval()
 
 	#print("[ok]")
