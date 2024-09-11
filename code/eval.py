@@ -153,7 +153,7 @@ if __name__ == "__main__":
 	else:
 		host_pred_list = predict(model, cached_test_ph, l2fa, args.device)
 
-	for i in range(len(cached_test_ph)):
+	for i in range(len(host_pred_list)):
 
 		print(test_phName[i], end="\t")
 		idxs = np.argsort(host_pred_list[i])
