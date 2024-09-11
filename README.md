@@ -94,4 +94,5 @@ python code/eval.py --model "CNN" --model_dir $model_file \
 
 ## Update
 2024/09/11  Comment verbose printing in eval.py and add an option to use the learned BatchNorm statistics from training data (--use_train_bn). 
+
 2024/08/06  The text output format bug has been fixed (line 161 in eval.py, with no impact on the evaluation of benchmark datasets). 
