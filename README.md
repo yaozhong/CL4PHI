@@ -52,7 +52,7 @@ CODE="code/train_cl.py"
 kmer=6
 model="CNN"
 
-model_info="CL_model_margin-{$margin}-epoch-${epoch}" 
+model_info="CL_model_margin-${margin}-epoch-${epoch}" 
 
 # host data
 host_fa="data/CHERRY_benchmark_datasplit/cherry_host.fasta"
@@ -89,6 +89,7 @@ test_phage_fa="data/CHERRY_benchmark_datasplit/CHERRY_test.fasta"
 python code/eval.py --model "CNN" --model_dir $model_file \
  --host_fa $host_fa --host_list $host_list \
  --test_phage_fa $test_phage_fa \
+ --batch_size 1 --worker 1 \
  --kmer $kmer --device $device 
 ```
 
