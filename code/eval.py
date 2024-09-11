@@ -101,7 +101,7 @@ if __name__ == "__main__":
 	parser.add_argument('--test_phage_fa', default="",   type=str, required=True, help='Test phage fasta file')
 	parser.add_argument('--test_host_gold', default="",  type=str, required=False, help='Infecting host gold list')
 
-	parser.add_argument('--use_tran_bn', action='store_true', required=False, help='use the batch norm in the train')
+	parser.add_argument('--use_train_bn', action='store_true', required=False, help='use the batch norm statistics in the train')
 	
 	args = parser.parse_args()
 
