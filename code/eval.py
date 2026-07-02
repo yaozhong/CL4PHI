@@ -10,7 +10,7 @@ from sklearn import metrics
 
 def test(model, cached_ph, l2fa, cached_label, device, threshold=1, verbose=False):
 
-    model.eval()
+	model.eval()
 
 	# first generate embeddings for the host.
 	host_vec = np.array([l2fa[l] for l in l2fa.keys()])
@@ -54,7 +54,8 @@ def test(model, cached_ph, l2fa, cached_label, device, threshold=1, verbose=Fals
 # prediction without provide gold standard
 def predict(model, cached_ph, l2fa, device):
 
-    model.eval()
+
+	model.eval()
 
 	# first generate embeddings for the host.
 	host_vec = np.array([l2fa[l] for l in l2fa.keys()])
