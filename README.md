@@ -94,6 +94,7 @@ python code/eval.py --model "CNN" --model_dir $model_file \
 
 ## Update
 2026/07/02 (**v1.2**) Reformulate the same margin-based contrastive loss (ContrastiveLoss) using an efficient matrix-broadcast computation instead of per-host image duplication, substantially reducing training time (the speedup scales with the candidate host pool size) while producing results statistically consistent with the original implementation.
+
 2026/07/02 (v1.1) Add BatchNorm recalibration: `train_cl.py` now recalibrates the best checkpoint's BatchNorm statistics once at the end of training. No further setting on eval.py.
 
 2024/09/11  Comment verbose printing in eval.py and add an option to use the learned BatchNorm statistics from training data (--use_train_bn). 
