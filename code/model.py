@@ -21,6 +21,26 @@ class ContrastiveLoss(torch.nn.Module):
 		return loss
 
 
+# CL4PHI v1.2: matrix-broadcast form of ContrastiveLoss, used by
+# train_cl_matrix.py. Mathematically identical to ContrastiveLoss applied to
+# train_cl.py's exhaustive per-host pairing (y*d^2 + (1-y)*hinge(margin-d)^2,
+# flat-averaged over B*M pairs), computed via a [B,M] pairwise distance
+# matrix instead of physically replicating each phage image M times before
+# the CNN. See CHANGELOG.md for the full explanation and a numerical check.
+def matrix_contrastive_loss(embed_ph, embed_bt, gold_labels, label_index, margin):
+	diff = embed_ph.unsqueeze(1) - embed_bt.unsqueeze(0)   # [B, M, D]
+	dist = torch.sqrt(torch.sum(diff ** 2, dim=-1))        # [B, M]
+	dist_sq = dist ** 2
+	mdist = torch.clamp(margin - dist, min=0.0)
+
+	pos_mask = torch.zeros_like(dist)
+	for i, g in enumerate(gold_labels):
+		pos_mask[i, label_index[int(g)]] = 1.0
+
+	loss = pos_mask * dist_sq + (1 - pos_mask) * (mdist ** 2)
+	return loss.mean() / 2.0   # matches ContrastiveLoss's /2.0/(B*M) normalization
+
+
 def distance(x1, x2, dist_type="euc"):
 
 	if dist_type == "euc":
