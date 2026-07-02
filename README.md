@@ -1,5 +1,8 @@
 # Contrastive Learning for Phage-host interaction (CL4PHI)
 
+The new version of CL4PHI using infoNCE and phylognentic information is available at [CE4PHI](https://github.com/yaozhong/CE4PHI).
+
+
 ![](figures/pipeline.png)
 
 ## Enviroments and Package dependency
@@ -36,7 +39,7 @@ We provided trained models of CL4PHI, DeepHost and CHERRY trained on each data s
 under the fold [/trained_models](https://drive.google.com/drive/folders/1hnvj7gbJ1kpJ3uGegmqGB-mF7y_B71k3?usp=share_link)
 
 
-## Running thde code
+## Running the code
 
 ### Training
 ```
