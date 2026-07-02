@@ -101,7 +101,6 @@ if __name__ == "__main__":
 	parser.add_argument('--test_phage_fa', default="",   type=str, required=True, help='Test phage fasta file')
 	parser.add_argument('--test_host_gold', default="",  type=str, required=False, help='Infecting host gold list')
 
-	parser.add_argument('--use_train_bn', action='store_true', required=False, help='use the batch norm statistics in the train')
 	
 	args = parser.parse_args()
 
@@ -119,10 +118,7 @@ if __name__ == "__main__":
 	model.load_state_dict(torch.load(args.model_dir))
 	model = model.to(args.device)
 
-	if args.use_train_bn:
-		model.eval()
-
-	#print("[ok]")
+	model.eval()
 
 	## 2. loading data
 	#print("@ Loading phage dataset ... ", end="")

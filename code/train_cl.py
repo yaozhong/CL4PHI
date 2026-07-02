@@ -17,7 +17,7 @@ import warnings
 warnings.filterwarnings("ignore")
 
 
-def set_seed(s):                                                                                              
+def set_seed(s):
 	random.seed(s)
 	np.random.seed(s)
 	torch.manual_seed(s)
@@ -26,6 +26,48 @@ def set_seed(s):
 	#add additional seed
 	torch.backends.cudnn.deterministic=True
 	torch.use_deterministic_algorithms = True
+
+
+# CL4PHI v1.1 patch: BatchNorm recalibration applied when saving the model.
+#
+# A standard, minimally-invasive, training-free correction ("BN recalibration"
+# / "BN re-estimation", used e.g. in network-pruning and fine-tuning
+# pipelines): for a given set of (frozen) weights, reset the BatchNorm running
+# statistics and re-estimate them from scratch by running forward-only passes
+# (no gradient, no optimizer step, weights untouched) over the TRAINING set
+# (never the test set, to avoid test-time leakage), using cumulative-average
+# accumulation (momentum=None) so every batch contributes equally. This
+# re-synchronizes the running statistics with the CURRENT frozen weights.
+#
+# Applied here to the best checkpoint before it is saved, so the released model
+# carries BatchNorm statistics consistent with its weights. At test time,
+# eval.py --use_train_bn (model.eval()) then gives stable, batch-independent
+# predictions WITHOUT needing the training data again. No training
+# hyperparameters, model architecture, or algorithm logic is changed.
+
+def recalibrate_bn(model, l2fa, fa_train_dataset, kmer, device, batch_size=32, passes=3):
+	for m in model.modules():
+		if isinstance(m, torch.nn.BatchNorm2d):
+			m.reset_running_stats()
+			m.momentum = None  # cumulative moving average, not exponential
+
+	host_vec_all = torch.tensor(np.array([l2fa[l] for l in l2fa.keys()]),
+	                            dtype=torch.float32).to(device)
+	host_vec_all = torch.unsqueeze(host_vec_all, dim=1)
+
+	loader = DataLoader(fa_train_dataset, batch_size,
+	                    collate_fn=partial(my_collate_fn2, kmer=kmer), num_workers=8)
+
+	model.train()  # activates BN running-stat updates
+	with torch.no_grad():  # ...but guarantees no gradient / no weight change
+		for _ in range(passes):
+			for phs, _labels, _names in loader:
+				imgs = torch.unsqueeze(torch.tensor(phs, dtype=torch.float32), 1).to(device)
+				model(imgs)
+			model(host_vec_all)  # host encoder shares the same BN layers
+
+	model.eval()
+	return model
 
 
 def train(dl_model, data_set, model_path, kmer, margin, batch_size, lr, epoch,\
@@ -126,6 +168,18 @@ def train(dl_model, data_set, model_path, kmer, margin, batch_size, lr, epoch,\
 	
 	idx = epoch_acc_valid.index(max(epoch_acc_valid))
 	print(f"[Valid epoch idx/epoch]:{idx}/{epoch}, [valid acc]:{epoch_acc_valid[idx]}")
+
+	# v1.1: BN recalibration of the saved best checkpoint (see recalibrate_bn above).
+	# Best-epoch selection above is unchanged; we simply reload the best weights,
+	# re-estimate their BatchNorm running statistics from the training data, and
+	# overwrite the file. The saved model then carries BN statistics consistent
+	# with its weights, so eval.py --use_train_bn is stable without re-reading the
+	# training data at test time.
+	model.load_state_dict(torch.load(model_path, map_location=device))
+	recalibrate_bn(model, l2fa, fa_train_dataset, kmer, device, batch_size=batch_size)
+	torch.save(model.state_dict(), model_path)
+	print(" @ v1.1: BatchNorm recalibration applied to the saved checkpoint.")
+
 	used_train = time.time() - start_train
 	print(" @ used training time:", round(used_train,2), "s. Total time:", round(used_train+used_dataload,2))
 
@@ -133,20 +187,22 @@ def train(dl_model, data_set, model_path, kmer, margin, batch_size, lr, epoch,\
 
 if __name__ == "__main__":
 
-	set_seed(123)
-
 	parser = argparse.ArgumentParser(description='<Contrastive learning for the phage-host identification>')
 
 	parser.add_argument('--model',       default="CNN", type=str, required=True, help='contrastive learning encoding model')
 	parser.add_argument('--model_dir', action="store",   type=str, required=True,  help="directory for saving the trained model.")
 	parser.add_argument('--device',       default="cuda:0", type=str, required=False, help='GPU Device(s) used for training')
-	
+
 	parser.add_argument('--kmer',       default=5,       type=int, required=True, help='kmer length')
 	parser.add_argument('--margin',     default=1,       type=int, required=True, help='Margins used in the contrastive training')
 	parser.add_argument('--lr',     	default=1e-3,   type=float, required=False, help='Learning rate')
 	parser.add_argument('--epoch',      default=20,       type=int, required=False, help='Training epcohs')
 	parser.add_argument('--batch_size' ,default=64,      type=int,  required=False, help="batch_size of the training.")
 	parser.add_argument('--workers',     default=64,       type=int, required=False, help='number of worker for data loading')
+	# v1.1: the original script hardcoded set_seed(123) with no CLI option;
+	# --seed (default 123, i.e. identical behaviour when omitted) makes
+	# multi-seed runs possible without editing the source.
+	parser.add_argument('--seed',        default=123,     type=int, required=False, help='random seed (default 123, matching the original hardcoded value)')
 
 	# data related input
 	parser.add_argument('--host_fa',   default="",  type=str, required=True, help='Host fasta files')
@@ -157,8 +213,9 @@ if __name__ == "__main__":
 	parser.add_argument('--valid_phage_fa', default="",   type=str, required=True, help='Validset Phage fasta file')
 	parser.add_argument('--valid_host_gold', default="",  type=str, required=True, help='Validset Phage infectable host label')
 
-	
+
 	args = parser.parse_args()
+	set_seed(args.seed)
 
 	data_set=[args.host_fa, args.host_list, args.train_phage_fa, args.train_host_gold, args.valid_phage_fa, args.valid_host_gold]
 
