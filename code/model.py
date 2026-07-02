@@ -35,7 +35,10 @@ def matrix_contrastive_loss(embed_ph, embed_bt, gold_labels, label_index, margin
 
 	pos_mask = torch.zeros_like(dist)
 	for i, g in enumerate(gold_labels):
-		pos_mask[i, label_index[int(g)]] = 1.0
+		# multi-host: g is a list of host ids for this phage (single-host -> len 1)
+		gs = g if isinstance(g, (list, tuple)) else [g]
+		for gid in gs:
+			pos_mask[i, label_index[int(gid)]] = 1.0
 
 	loss = pos_mask * dist_sq + (1 - pos_mask) * (mdist ** 2)
 	return loss.mean() / 2.0   # matches ContrastiveLoss's /2.0/(B*M) normalization

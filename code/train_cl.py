@@ -115,12 +115,12 @@ def train(dl_model, data_set, model_path, kmer, margin, batch_size, lr, epoch,\
 	for phs, labels, _names in train_generator:
 		imgs_ph = torch.tensor(phs, dtype=torch.float32)
 		cached_train_ph.append(torch.unsqueeze(imgs_ph, dim=1))
-		cached_train_label.append(torch.tensor(labels))
+		cached_train_label.append(labels)   # list of per-phage host-id lists (multi-host)
 
 	for phs, labels, phName in valid_generator:
 		imgs_ph = torch.tensor(phs, dtype=torch.float32)
 		cached_valid_ph.append(torch.unsqueeze(imgs_ph, dim=1))
-		cached_valid_label.append(torch.tensor(labels))
+		cached_valid_label.append(labels)   # list of per-phage host-id lists (multi-host)
 		cached_valid_phageName.append(phName)
 
 	print(" |- loading [ok].")

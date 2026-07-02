@@ -21,30 +21,36 @@ def test(model, cached_ph, l2fa, cached_label, device, threshold=1, verbose=Fals
 	label_list = list(l2fa.keys())
 
 	pred_list, pred_dist, gold_list = [], [], []
+	hit, tot = 0, 0
 	total_batch = len(cached_ph)
 
 	with torch.no_grad():
 		for i in range(total_batch):
-			phs, labels = cached_ph[i], cached_label[i]
+			phs, labels = cached_ph[i], cached_label[i]   # labels: list of per-phage host-id lists
 
 			phs = phs.to(device)
-			labels = labels.to(device)
 			embed_phs = model(phs)
 
 			# local calcuation of the distance scores
-			for e_ph in embed_phs:
+			for j, e_ph in enumerate(embed_phs):
 				diff =  embed_bts - e_ph
 				dist_sq = torch.sum(torch.pow(diff, 2), 1)
 				dist = torch.sqrt(dist_sq)
 
 				pred_dist.append(dist.to("cpu").detach().numpy())
-				idx = torch.argmin(dist).to("cpu").detach().numpy()
-				
-				pred_list.extend([label_list[idx]])
-				
-			gold_list.extend(labels.to("cpu").detach().numpy())
+				idx = int(torch.argmin(dist).to("cpu").detach().numpy())
+				pred = label_list[idx]
+				pred_list.append(pred)
 
-	acc = metrics.accuracy_score(gold_list, pred_list)
+				# multi-host aware top-1: correct if the predicted host is any of
+				# this phage's gold hosts (single-host -> a length-1 gold set).
+				gold = labels[j]
+				gold = gold if isinstance(gold, (list, tuple)) else [gold]
+				gold_list.append(list(gold))
+				tot += 1
+				hit += int(pred in set(int(g) for g in gold))
+
+	acc = hit / tot if tot else 0.0
 	if verbose:
 		print(f"@ Given set  Accuracy is {acc}")
 

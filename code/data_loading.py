@@ -18,8 +18,13 @@ def get_data_host_sets(file_name_list):
 		s_in = open(fn)
 		
 		for line in s_in:
-			line_info = line.strip("\n")
-			labels.append(line_info)
+			line_info = line.strip("\n").strip()
+			# multi-host support: split comma-separated hosts so each individual
+			# host name enters the set (single-host lines are unaffected).
+			for h in line_info.split(","):
+				h = h.strip()
+				if h:
+					labels.append(h)
 
 		s_in.close()
 
@@ -49,8 +54,11 @@ def load_host_label(file_name, l2s_dic):
 	labels = []
 
 	for line in s_in:
-		line_info = line.strip("\n")
-		labels.append(l2s_dic[line_info])
+		line_info = line.strip("\n").strip()
+		# multi-host support: a phage may list several hosts, comma-separated.
+		# single-host lines yield a length-1 list (behaviour unchanged).
+		ids = [l2s_dic[h.strip()] for h in line_info.split(",") if h.strip() in l2s_dic]
+		labels.append(ids)
 
 	s_in.close()
 
@@ -125,7 +133,9 @@ def my_collate_fn2(batch, kmer):
 		images.append(img)
 		phage_name_list.append(phage_name)
 
-	return np.array(images), np.array(labels), phage_name_list
+	# labels kept as a Python list of per-phage host-id lists (multi-host may be
+	# ragged, so it is NOT stacked into an ndarray).
+	return np.array(images), labels, phage_name_list
 
 
 class fasta_dataset(Dataset):
