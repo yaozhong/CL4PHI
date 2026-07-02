@@ -10,12 +10,11 @@
 # *computation path* changes, not the training objective.
 #
 
-import argparse, time
+import argparse, time, random
 
 from data_loading import *
 from model import * 
 from eval import *
-from train_cl import set_seed, recalibrate_bn
 
 import torch
 import torch.optim as optim
