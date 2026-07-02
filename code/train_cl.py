@@ -140,7 +140,7 @@ def train(dl_model, data_set, model_path, kmer, margin, batch_size, lr, epoch,\
 	epoch_acc_valid, epoch_acc_test, epoch_cm = [], [], []
 	current_best_valid_acc = -100
 	for ep in range(epoch):
-        model.train()
+		model.train()
 		epoch_loss = 0
 		for i in range(len(cached_train_ph)):
 			phs, bts, labels = cached_train_ph[i], cached_train_bt[i], cached_train_label[i]
