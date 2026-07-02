@@ -10,6 +10,8 @@ from sklearn import metrics
 
 def test(model, cached_ph, l2fa, cached_label, device, threshold=1, verbose=False):
 
+    model.eval()
+
 	# first generate embeddings for the host.
 	host_vec = np.array([l2fa[l] for l in l2fa.keys()])
 	host_vec = torch.tensor(host_vec, dtype=torch.float32).to(device)
@@ -51,6 +53,8 @@ def test(model, cached_ph, l2fa, cached_label, device, threshold=1, verbose=Fals
 
 # prediction without provide gold standard
 def predict(model, cached_ph, l2fa, device):
+
+    model.eval()
 
 	# first generate embeddings for the host.
 	host_vec = np.array([l2fa[l] for l in l2fa.keys()])
@@ -118,7 +122,6 @@ if __name__ == "__main__":
 	model.load_state_dict(torch.load(args.model_dir))
 	model = model.to(args.device)
 
-	model.eval()
 
 	## 2. loading data
 	#print("@ Loading phage dataset ... ", end="")
