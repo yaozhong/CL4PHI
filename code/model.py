@@ -2,6 +2,7 @@
 
 import torch
 from torch import nn
+import torch.nn.functional as F
 
 class ContrastiveLoss(torch.nn.Module):
 	def __init__(self, margin=1.0):
@@ -58,7 +59,11 @@ def distance(x1, x2, dist_type="euc"):
 
 # define the basic module
 class cnn_module(nn.Module):
-	def __init__(self, kernel_size=7, dr=0):
+	# v1.2.2: normalize_output=True L2-normalizes the embedding so the euclidean
+	# distance becomes the (bounded) chord distance d=sqrt(2-2cos) on the unit
+	# sphere. This is the ONLY change v1.2.1 -> v1.2.2 (loss and margin=1 unchanged).
+	# Set normalize_output=False to recover the original v1.2.1 raw-euclidean geometry.
+	def __init__(self, kernel_size=7, dr=0, normalize_output=True):
 		super(cnn_module, self).__init__()
 		self.conv1 = nn.Conv2d(1,64,kernel_size=kernel_size, stride=2)
 		self.bn1 = nn.BatchNorm2d(64)
@@ -68,9 +73,10 @@ class cnn_module(nn.Module):
 
 		self.maxpool = nn.MaxPool2d(2)
 		self.dropout = nn.Dropout(dr)
-		
+
 		self.fc1 = nn.Linear(4608, 512)
-	
+		self.normalize_output = normalize_output
+
 
 	def forward(self, x):
 		x = self.bn1(self.relu(self.conv1(x)))
@@ -78,5 +84,8 @@ class cnn_module(nn.Module):
 		x = self.maxpool(x)
 
 		x = self.fc1(torch.flatten(x, 1))
-	
+
+		if self.normalize_output:   # v1.2.2: L2 normalization -> calibrated chord geometry
+			x = F.normalize(x, p=2, dim=1)
+
 		return x

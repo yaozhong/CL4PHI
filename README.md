@@ -93,6 +93,9 @@ python code/eval.py --model "CNN" --model_dir $model_file \
 ```
 
 ## Update
+- 2026/07/04 v1.2.2: L2-normalized (chord) geometry. Only change from v1.2.1: encoder output is L2-normalized (default), so euclidean distance becomes bounded chord distance. Loss and margin=1
+unchanged. Calibrated geometry -> stable prior fusion + better close-host separation.
+
 - 2026/07/02 (**v1.2.1**) Reformulate the same margin-based contrastive loss (ContrastiveLoss) using an efficient matrix-broadcast computation instead of per-host image duplication, substantially reducing training time (the speedup scales with the candidate host pool size) while producing results statistically consistent with the original implementation. Multi-host support.
 
 - 2026/07/02 (v1.1) Add BatchNorm recalibration: `train_cl.py` now recalibrates the best checkpoint's BatchNorm statistics once at the end of training. No further setting on eval.py.
