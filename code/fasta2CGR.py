@@ -68,20 +68,11 @@ def chaos_game_representation(probabilities, k):
 
 
 def seq_to_fcgr(sequence, k):
-	"""Vectorized frequency chaos-game representation (FCGR) of a DNA sequence,
+	"""
+    Vectorized frequency chaos-game representation (FCGR) of a DNA sequence,
 	returned as a (2^k x 2^k) numpy array.
-
-	Ambiguity handling (v1.2.2): any k-mer containing a non-ACGT character is
-	EXCLUDED from the count -- the standard k-mer-counter convention (KMC,
-	Jellyfish), which is deterministic and unbiased. This supersedes the original
-	chaos_game_representation, which treated every non-T/C/G base (N and all other
-	IUPAC ambiguity codes: R/Y/S/W/K/M/B/D/H/V) as 'A' and then OVERWROTE the
-	resulting colliding grid cells in a dict-insertion-order-dependent way (see
-	count_kmers / chaos_game_representation below, kept for reference). On pure
-	ACGT sequences and on ACGT+N sequences the two agree exactly; they differ only
-	on sequences carrying the other ambiguity codes, where this version is correct.
-	Soft-masked (lower-case) a/c/g/t are treated as normal bases; the probability
-	of each retained k-mer is count / (len(seq) - k + 1)."""
+	of each retained k-mer is count / (len(seq) - k + 1).
+    """
 	size = int(math.sqrt(4 ** k))
 	n = len(sequence)
 	fcgr = np.zeros((size, size), dtype=np.float64)
