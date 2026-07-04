@@ -42,12 +42,6 @@ def set_seed(s):
 # (never the test set, to avoid test-time leakage), using cumulative-average
 # accumulation (momentum=None) so every batch contributes equally. This
 # re-synchronizes the running statistics with the CURRENT frozen weights.
-#
-# Applied here to the best checkpoint before it is saved, so the released model
-# carries BatchNorm statistics consistent with its weights. At test time,
-# eval.py --use_train_bn (model.eval()) then gives stable, batch-independent
-# predictions WITHOUT needing the training data again. No training
-# hyperparameters, model architecture, or algorithm logic is changed.
 
 def recalibrate_bn(model, l2fa, fa_train_dataset, kmer, device, batch_size=32, passes=3):
 	for m in model.modules():
@@ -131,7 +125,7 @@ def train(dl_model, data_set, model_path, kmer, margin, batch_size, lr, epoch,\
 
 	# model 2 (using CNN module)
 	if dl_model == "CNN":
-		model = cnn_module(7).to(device)
+		model = cnn_module(7, kmer=kmer).to(device)
 		optimizer = optim.Adam(model.parameters(), lr=lr)
 
 	if verbose:
@@ -192,7 +186,7 @@ if __name__ == "__main__":
 	parser.add_argument('--lr',     	default=1e-3,   type=float, required=False, help='Learning rate')
 	parser.add_argument('--epoch',      default=300,       type=int, required=False, help='Training epcohs')
 	parser.add_argument('--batch_size' ,default=32,      type=int,  required=False, help="batch_size of the training.")
-	parser.add_argument('--workers',     default=8,       type=int, required=False, help='number of worker for data loading')
+	parser.add_argument('--workers',     default=16,       type=int, required=False, help='number of worker for data loading')
 	parser.add_argument('--seed',        default=123,     type=int, required=False, help='random seed (default 123, matching train_cl.py)')
 
 	# data related input

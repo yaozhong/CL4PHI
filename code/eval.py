@@ -124,7 +124,7 @@ if __name__ == "__main__":
 	#print("@ Loading model ... ", end="")
 	## parparing host data information.
 	if args.model == "CNN":
-		model = cnn_module(7, 0)
+		model = cnn_module(7, 0, kmer=args.kmer)
 	
 	model.load_state_dict(torch.load(args.model_dir))
 	model = model.to(args.device)

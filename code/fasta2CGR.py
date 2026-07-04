@@ -67,6 +67,47 @@ def chaos_game_representation(probabilities, k):
 	return chaos
 
 
+def seq_to_fcgr(sequence, k):
+	"""
+    Vectorized frequency chaos-game representation (FCGR) of a DNA sequence,
+	returned as a (2^k x 2^k) numpy array.
+
+	Ambiguity handling (v1.2.2): any k-mer containing a non-ACGT character is
+	EXCLUDED from the count -- the standard k-mer-counter convention (KMC,
+	Jellyfish), which is deterministic and unbiased. 
+    """
+	size = int(math.sqrt(4 ** k))
+	n = len(sequence)
+	fcgr = np.zeros((size, size), dtype=np.float64)
+	if n < k:
+		return fcgr
+	arr = np.frombuffer(sequence.upper().encode('ascii', 'replace'), dtype=np.uint8)
+	# base -> (x-bit, y-bit): A=(0,0) C=(0,1) G=(1,1) T=(1,0); any other char is invalid
+	xb = np.zeros(256, dtype=np.int64)
+	yb = np.zeros(256, dtype=np.int64)
+	invalid = np.ones(256, dtype=bool)
+	for ch, x, y in [('A', 0, 0), ('C', 0, 1), ('G', 1, 1), ('T', 1, 0)]:
+		xb[ord(ch)] = x
+		yb[ord(ch)] = y
+		invalid[ord(ch)] = False
+	X = xb[arr]
+	Y = yb[arr]
+	inv = invalid[arr].astype(np.int64)
+	m = n - k + 1
+	powers = (2 ** np.arange(k - 1, -1, -1)).astype(np.int64)
+	xi = np.zeros(m, dtype=np.int64)
+	yi = np.zeros(m, dtype=np.int64)
+	nInv = np.zeros(m, dtype=np.int64)
+	for j in range(k):   # k vectorized adds; no [n, k] window materialization
+		xi += X[j:j + m] * powers[j]
+		yi += Y[j:j + m] * powers[j]
+		nInv += inv[j:j + m]
+	valid = nInv == 0    # exclude any k-mer that contains a non-ACGT base
+	flat = yi[valid] * size + xi[valid]
+	counts = np.bincount(flat, minlength=size * size).reshape(size, size).astype(np.float64)
+	return counts / (n - k + 1)   # divide by total window count (matches probabilities())
+
+
 def cgr_positions(seq):
 
 	# CGR_CENTER = (0.5, 0.5)

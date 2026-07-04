@@ -63,7 +63,7 @@ class cnn_module(nn.Module):
 	# distance becomes the (bounded) chord distance d=sqrt(2-2cos) on the unit
 	# sphere. This is the ONLY change v1.2.1 -> v1.2.2 (loss and margin=1 unchanged).
 	# Set normalize_output=False to recover the original v1.2.1 raw-euclidean geometry.
-	def __init__(self, kernel_size=7, dr=0, normalize_output=True):
+	def __init__(self, kernel_size=7, dr=0, normalize_output=True, kmer=6):
 		super(cnn_module, self).__init__()
 		self.conv1 = nn.Conv2d(1,64,kernel_size=kernel_size, stride=2)
 		self.bn1 = nn.BatchNorm2d(64)
@@ -74,7 +74,17 @@ class cnn_module(nn.Module):
 		self.maxpool = nn.MaxPool2d(2)
 		self.dropout = nn.Dropout(dr)
 
-		self.fc1 = nn.Linear(4608, 512)
+		# kmer-adaptive fc1: the FCGR image is (2^kmer)x(2^kmer); derive the flattened
+		# feature dim from the conv(stride2)->conv(stride2)->maxpool(2) stack so any kmer
+		# works (kmer=6 gives 4608, identical to the hard-coded value before).
+		fcgr = 2 ** kmer
+		c1 = (fcgr - kernel_size) // 2 + 1
+		c2 = (c1 - kernel_size) // 2 + 1
+		mp = c2 // 2
+		assert mp >= 1, f"kmer={kmer} too small for kernel_size={kernel_size}: feature map collapses"
+		flat_dim = mp * mp * 128
+
+		self.fc1 = nn.Linear(flat_dim, 512)
 		self.normalize_output = normalize_output
 
 
