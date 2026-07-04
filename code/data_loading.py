@@ -69,9 +69,7 @@ def get_host_fa(s2l_dic, host_fa_file, kmer, keep_list=[]):
 			continue
 
 		seq = wgs[bn][:].seq
-		fc = count_kmers(seq, kmer)
-		f_prob = probabilities(seq, fc, kmer)
-		chaos_k = chaos_game_representation(f_prob, kmer)
+		chaos_k = seq_to_fcgr(seq, kmer)   # v1.2.2-aligned: vectorized FCGR, excludes non-ACGT k-mers
 
 		label = s2l_dic[bn.replace("_", " ")]
 		l2fa[label] = chaos_k
@@ -87,10 +85,7 @@ def my_collate_fn(batch, kmer, l2fa):
 		seq = seq
 
 		# FCGR, represntation for phage
-		fc = count_kmers(seq, kmer)
-		f_prob = probabilities(seq, fc, kmer)
-		# consider the evluation of the k.
-		chaos_k = chaos_game_representation(f_prob, kmer)
+		chaos_k = seq_to_fcgr(seq, kmer)   # v1.2.2-aligned: vectorized FCGR, excludes non-ACGT k-mers
 		img = chaos_k
 
 		# consider the efficiency here.
@@ -117,10 +112,7 @@ def my_collate_fn2(batch, kmer):
 		labels.append(label)
 
 		# FCGR
-		fc = count_kmers(seq, kmer)
-		f_prob = probabilities(seq, fc, kmer)
-		# consider the evluation of the k.
-		chaos_k = chaos_game_representation(f_prob, kmer)
+		chaos_k = seq_to_fcgr(seq, kmer)   # v1.2.2-aligned: vectorized FCGR, excludes non-ACGT k-mers
 		img = chaos_k
 		images.append(img)
 		phage_name_list.append(phage_name)
