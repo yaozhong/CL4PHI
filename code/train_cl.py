@@ -183,7 +183,7 @@ if __name__ == "__main__":
 
 	parser.add_argument('--kmer',       default=6,       type=int, required=True, help='kmer length')
 	parser.add_argument('--margin',     default=1,       type=int, required=True, help='Margins used in the contrastive training')
-	parser.add_argument('--lr',     	default=1e-3,   type=float, required=False, help='Learning rate')
+	parser.add_argument('--lr',     	default=1e-5,   type=float, required=False, help='Learning rate')
 	parser.add_argument('--epoch',      default=300,       type=int, required=False, help='Training epcohs')
 	parser.add_argument('--batch_size' ,default=32,      type=int,  required=False, help="batch_size of the training.")
 	parser.add_argument('--workers',     default=16,       type=int, required=False, help='number of worker for data loading')

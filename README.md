@@ -40,7 +40,7 @@ under the fold [/trained_models](https://drive.google.com/drive/folders/1hnvj7gb
 
 ### Training
 ```
-lr=1e-3
+lr=1e-5
 epoch=300
 batch_size=32
 margin=1
