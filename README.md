@@ -43,7 +43,7 @@ under the fold [/trained_models](https://drive.google.com/drive/folders/1hnvj7gb
 lr=1e-5
 epoch=300
 batch_size=32
-margin=1
+margin=0.447
 
 model_save_path="model_save_path/" 
 device="cuda:0"  
@@ -93,7 +93,9 @@ python code/eval.py --model "CNN" --model_dir $model_file \
 ```
 
 ## Update
-- 2026/07/04 (v1.2.2): L2-normalized (chord) geometry. Change from v1.2.1: (1).encoder output is L2-normalized (default), so euclidean distance becomes bounded chord distance. Loss and margin=1 unchanged. Calibrated geometry -> stable prior fusion + better close-host separation.
+- 2026/07/11: `--margin` now defaults to 0.447 and accepts float values. With the v1.2.2 L2-normalized (chord) geometry, the hinge margin is a chord distance; 0.447 = chord distance at cosine similarity 0.9 (chord = sqrt(2 - 2*cos)). Passing an integer still works.
+
+- 2026/07/04 (v1.2.2): L2-normalized (chord) geometry. Change from v1.2.1: (1).encoder output is L2-normalized (default), so euclidean distance becomes bounded chord distance. Calibrated geometry -> stable prior fusion + better close-host separation.
 (2).FCGR generation speedup and IUPAC ambiguity codes (R/Y/S/W/K/M/B/D/H/V) containing k-mer removing.
 
 - 2026/07/02 (v1.2.1) Reformulate the same margin-based contrastive loss (ContrastiveLoss) using an efficient matrix-broadcast computation instead of per-host image duplication, substantially reducing training time (the speedup scales with the candidate host pool size) while producing results statistically consistent with the original implementation. Multi-host support.
