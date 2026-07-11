@@ -36,14 +36,14 @@ We provided trained models of CL4PHI, DeepHost and CHERRY trained on each data s
 under the fold [/trained_models](https://drive.google.com/drive/folders/1hnvj7gbJ1kpJ3uGegmqGB-mF7y_B71k3?usp=share_link)
 
 
-## Running thde code
+## Running the code
 
 ### Training
 ```
 lr=1e-5
 epoch=300
 batch_size=32
-margin=0.447
+margin=0.447 # equal to cosine similarity 0.9
 
 model_save_path="model_save_path/" 
 device="cuda:0"  
@@ -75,7 +75,7 @@ python $CODE --model $model --model_dir $model_save_path/${model_info}.pth --kme
 ### Prediction
 
 ```
-model_file="model/CL4PHI/DeepHostDATA_CL_CNN_kmer-6_lr-1e-3_batch-32_margin-1.pth"
+model_file="model/CL4PHI/DeepHostDATA_CL_CNN_kmer-6_lr-1e-3_batch-32_margin-0.447.pth"
 OUTPUT="results/CL4PHI_pred_results.txt"
 
 # host data
