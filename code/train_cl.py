@@ -31,7 +31,7 @@ def set_seed(s):
 	torch.cuda.manual_seed_all(s)
 	#add additional seed
 	torch.backends.cudnn.deterministic=True
-	torch.use_deterministic_algorithms = True
+	torch.use_deterministic_algorithms(True)
 
 
 # A standard, minimally-invasive, training-free correction ("BN recalibration"
