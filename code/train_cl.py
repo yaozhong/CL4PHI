@@ -170,7 +170,7 @@ def train(dl_model, data_set, model_path, kmer, margin, batch_size, lr, epoch,\
 
 	# v1.1 BN recalibration, reused unchanged from train_cl.py (see CHANGELOG.md).
 	model.load_state_dict(torch.load(model_path, map_location=device))
-	recalibrate_bn(model, l2fa, fa_train_dataset, kmer, device, batch_size=batch_size)
+	recalibrate_bn(model, l2fa_filter, fa_train_dataset, kmer, device, batch_size=batch_size)
 	torch.save(model.state_dict(), model_path)
 	print(" @ BatchNorm recalibration applied to the saved checkpoint.")
 
