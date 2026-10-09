@@ -10,7 +10,7 @@
 # *computation path* changes, not the training objective.
 #
 
-import argparse, time, random
+import argparse, time, random, os
 
 from data_loading import *
 from model import * 
@@ -24,6 +24,13 @@ warnings.filterwarnings("ignore")
 
 
 def set_seed(s):
+	# Precondition for use_deterministic_algorithms below: cuBLAS reductions
+	# have no deterministic path on CUDA >= 10.2 unless the workspace is
+	# pinned, and without this the first loss.backward() raises. It has to be
+	# set before cuBLAS initialises, i.e. before any CUDA work, which is why it
+	# lives here rather than being left to the caller's environment.
+	os.environ['CUBLAS_WORKSPACE_CONFIG'] = ':4096:8'
+
 	random.seed(s)
 	np.random.seed(s)
 	torch.manual_seed(s)
@@ -32,6 +39,9 @@ def set_seed(s):
 	#add additional seed
 	torch.backends.cudnn.deterministic=True
 	torch.use_deterministic_algorithms(True)
+	# determinism is meaningless while autotuning still selects a kernel by
+	# timing, so the benchmark path has to be off as well
+	torch.backends.cudnn.benchmark = False
 
 
 # A standard, minimally-invasive, training-free correction ("BN recalibration"
