@@ -30,8 +30,14 @@ class ContrastiveLoss(torch.nn.Module):
 # the CNN. See CHANGELOG.md for the full explanation and a numerical check.
 def matrix_contrastive_loss(embed_ph, embed_bt, gold_labels, label_index, margin):
 	diff = embed_ph.unsqueeze(1) - embed_bt.unsqueeze(0)   # [B, M, D]
-	dist = torch.sqrt(torch.sum(diff ** 2, dim=-1))        # [B, M]
-	dist_sq = dist ** 2
+	dist_sq = torch.sum(diff ** 2, dim=-1)                 # [B, M]
+	# only the hinge needs the root; taking dist_sq = dist ** 2 instead would
+	# route the positive term's gradient through sqrt, which is 2*d * 1/(2*d),
+	# i.e. 1 analytically but 0 * inf = NaN in floating point for a positive
+	# pair that happens to sit at distance 0 -- which is where the positive
+	# term is actively driving every pair. ContrastiveLoss already does it
+	# this way.
+	dist = torch.sqrt(dist_sq.clamp_min(1e-12))            # [B, M]
 	mdist = torch.clamp(margin - dist, min=0.0)
 
 	pos_mask = torch.zeros_like(dist)

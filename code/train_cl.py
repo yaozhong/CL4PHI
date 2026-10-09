@@ -10,7 +10,7 @@
 # *computation path* changes, not the training objective.
 #
 
-import argparse, time, random
+import argparse, time, random, os
 
 from data_loading import *
 from model import * 
@@ -24,6 +24,13 @@ warnings.filterwarnings("ignore")
 
 
 def set_seed(s):
+	# Precondition for use_deterministic_algorithms below: cuBLAS reductions
+	# have no deterministic path on CUDA >= 10.2 unless the workspace is
+	# pinned, and without this the first loss.backward() raises. It has to be
+	# set before cuBLAS initialises, i.e. before any CUDA work, which is why it
+	# lives here rather than being left to the caller's environment.
+	os.environ['CUBLAS_WORKSPACE_CONFIG'] = ':4096:8'
+
 	random.seed(s)
 	np.random.seed(s)
 	torch.manual_seed(s)
@@ -31,7 +38,13 @@ def set_seed(s):
 	torch.cuda.manual_seed_all(s)
 	#add additional seed
 	torch.backends.cudnn.deterministic=True
-	torch.use_deterministic_algorithms = True
+	# must be CALLED, not assigned: `torch.use_deterministic_algorithms = True`
+	# rebinds the attribute and enables nothing, and leaves the function
+	# uncallable for the rest of the process.
+	torch.use_deterministic_algorithms(True)
+	# determinism is meaningless while autotuning still selects a kernel by
+	# timing, so the benchmark path has to be off as well
+	torch.backends.cudnn.benchmark = False
 
 
 # A standard, minimally-invasive, training-free correction ("BN recalibration"
@@ -164,7 +177,11 @@ def train(dl_model, data_set, model_path, kmer, margin, batch_size, lr, epoch,\
 
 	# v1.1 BN recalibration, reused unchanged from train_cl.py (see CHANGELOG.md).
 	model.load_state_dict(torch.load(model_path, map_location=device))
-	recalibrate_bn(model, l2fa, fa_train_dataset, kmer, device, batch_size=batch_size)
+	# l2fa_filter, not l2fa: the unfiltered panel contains hosts held out of the
+	# training labels, and pushing their genomes through the encoder in train()
+	# mode writes their statistics into the checkpoint's BatchNorm buffers,
+	# which makes the evaluation transductive rather than inductive.
+	recalibrate_bn(model, l2fa_filter, fa_train_dataset, kmer, device, batch_size=batch_size)
 	torch.save(model.state_dict(), model_path)
 	print(" @ BatchNorm recalibration applied to the saved checkpoint.")
 
