@@ -29,8 +29,8 @@ class ContrastiveLoss(torch.nn.Module):
 # the CNN. See CHANGELOG.md for the full explanation and a numerical check.
 def matrix_contrastive_loss(embed_ph, embed_bt, gold_labels, label_index, margin):
 	diff = embed_ph.unsqueeze(1) - embed_bt.unsqueeze(0)   # [B, M, D]
-	dist = torch.sqrt(torch.sum(diff ** 2, dim=-1))        # [B, M]
-	dist_sq = dist ** 2
+	dist_sq = torch.sum(diff ** 2, dim=-1)                 # [B, M]
+	dist = torch.sqrt(dist_sq.clamp_min(1e-12))            # [B, M]
 	mdist = torch.clamp(margin - dist, min=0.0)
 
 	pos_mask = torch.zeros_like(dist)
